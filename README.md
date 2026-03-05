@@ -69,7 +69,7 @@ Make sure you have uv installed. (https://docs.astral.sh/uv/getting-started/inst
 ```bash
 # 1. Prepare frozen window snapshots (one-time)
 uv sync
-uv run create_windows.py
+uv run generate_windows.py
 
 # 2. Run the full pipeline across all windows
 uv run run_local.py > overall_report.log
