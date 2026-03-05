@@ -30,18 +30,25 @@ Each window produces an HTML report with three sections:
 ## Project Structure
 
 ```
-├── notebooks/
-│   └── prepare_windows.ipynb   # Slices raw data into frozen parquet snapshots
-├── windows/                    # Immutable windowed parquet files (by ISO date)
+├── generate_windows.py     # Slices raw data into frozen parquet snapshots
+├── run_local.py            # Simulation of champion/challenger train-eval process for windows.
 ├── src/
-│   ├── config.py               # Window dates, feature groups, thresholds
-│   ├── preprocessing.py        # Cleaning, ICD-9 one-hot encoding, sklearn ColumnTransformer
-│   ├── training.py             # Pipeline construction and fitting
-│   └── ...                     # Evaluation, reporting, orchestration
+│   ├── __init__.py
+│   ├── config.py            # paths, feature lists, constants
+│   ├── data.py              # window loading, ds mapping
+│   ├── preprocessing.py     # encoding, cleaning, pipeline
+│   ├── training.py          # model fit + save
+│   ├── evaluation.py        # metrics + save
+│   └── drift.py             # evidently reports
+GIT ├── windows/                 # Immutable windowed parquet files (by ISO date)
+│   ├── 2004-12-31-train.parquet
+│   ├── 2004-12-31-eval.parquet
+│   ├── ...
+│   └── 2008-12-31-eval.parquet
 ├── artifacts/
-│   ├── pipelines/              # Serialized sklearn pipelines (champion + challengers)
-│   ├── evaluations/            # MLflow-logged metrics
-│   └── reports/                # HTML reports per window
+│   ├── pipelines/           # Serialized sklearn pipelines (champion + challengers)
+│   ├── evaluations/         # metrics JSON per model per window
+│   └── reports/             # evidently HTML per window
 └── README.md
 ```
 
@@ -57,15 +64,18 @@ The raw dataset is split into five year-long windows (~16,000 train / ~4,000 eva
 
 ## Running the Pipeline
 
+Make sure you have uv installed. (https://docs.astral.sh/uv/getting-started/installation/)
+
 ```bash
 # 1. Prepare frozen window snapshots (one-time)
-jupyter nbconvert --execute notebooks/prepare_windows.ipynb
+uv sync
+uv run create_windows.py
 
 # 2. Run the full pipeline across all windows
-python -m src.run
+uv run run_local.py > overall_report.log
 ```
 
-Output is written to `artifacts/`. Reports are archived under `artifacts/reports/{window_date}/`.
+Output is written to `artifacts/`. Reports are archived under `artifacts/reports/drift_{window_date}.html`.
 
 ## Key Design Decisions
 
