@@ -1,0 +1,109 @@
+[
+  {
+    "window": "2004-12-31",
+    "outcome": "cold_start",
+    "champion": "2004-12-31",
+    "champion_metrics": {
+      "model_date": "2004-12-31",
+      "eval_window_date": "2004-12-31",
+      "accuracy": 0.8843,
+      "f1": 0.1163,
+      "precision": 0.1703,
+      "recall": 0.0883,
+      "roc_auc": 0.6079
+    },
+    "challenger_metrics": null
+  },
+  {
+    "window": "2005-12-31",
+    "outcome": "promoted",
+    "champion": "2005-12-31",
+    "champion_metrics": {
+      "model_date": "2004-12-31",
+      "eval_window_date": "2005-12-31",
+      "accuracy": 0.8811,
+      "f1": 0.0763,
+      "precision": 0.1143,
+      "recall": 0.0573,
+      "roc_auc": 0.5515
+    },
+    "challenger_metrics": {
+      "model_date": "2005-12-31",
+      "eval_window_date": "2005-12-31",
+      "accuracy": 0.8799,
+      "f1": 0.1125,
+      "precision": 0.1535,
+      "recall": 0.0888,
+      "roc_auc": 0.5988
+    }
+  },
+  {
+    "window": "2006-12-31",
+    "outcome": "retained",
+    "champion": "2005-12-31",
+    "champion_metrics": {
+      "model_date": "2005-12-31",
+      "eval_window_date": "2006-12-31",
+      "accuracy": 0.8784,
+      "f1": 0.1176,
+      "precision": 0.1514,
+      "recall": 0.0962,
+      "roc_auc": 0.5692
+    },
+    "challenger_metrics": {
+      "model_date": "2006-12-31",
+      "eval_window_date": "2006-12-31",
+      "accuracy": 0.8865,
+      "f1": 0.087,
+      "precision": 0.135,
+      "recall": 0.0641,
+      "roc_auc": 0.5735
+    }
+  },
+  {
+    "window": "2007-12-31",
+    "outcome": "promoted",
+    "champion": "2007-12-31",
+    "champion_metrics": {
+      "model_date": "2005-12-31",
+      "eval_window_date": "2007-12-31",
+      "accuracy": 0.8445,
+      "f1": 0.1221,
+      "precision": 0.1571,
+      "recall": 0.0998,
+      "roc_auc": 0.5451
+    },
+    "challenger_metrics": {
+      "model_date": "2007-12-31",
+      "eval_window_date": "2007-12-31",
+      "accuracy": 0.8199,
+      "f1": 0.1487,
+      "precision": 0.1524,
+      "recall": 0.1451,
+      "roc_auc": 0.5508
+    }
+  },
+  {
+    "window": "2008-12-31",
+    "outcome": "promoted",
+    "champion": "2008-12-31",
+    "champion_metrics": {
+      "model_date": "2007-12-31",
+      "eval_window_date": "2008-12-31",
+      "accuracy": 0.73,
+      "f1": 0.1865,
+      "precision": 0.2059,
+      "recall": 0.1705,
+      "roc_auc": 0.5425
+    },
+    "challenger_metrics": {
+      "model_date": "2008-12-31",
+      "eval_window_date": "2008-12-31",
+      "accuracy": 0.6834,
+      "f1": 0.2762,
+      "precision": 0.2361,
+      "recall": 0.3329,
+      "roc_auc": 0.5741
+    }
+  }
+]

@@ -30,6 +30,7 @@ class ChampionChallengerPipeline:
     def run(self):
         for ds in self.window_dates:
             self._run_window(ds)
+        self._save_summary()
         self._print_summary()
 
     # ── Per-window logic ────────────────────────────────────────
@@ -136,6 +137,11 @@ class ChampionChallengerPipeline:
             "champion_metrics": champion_metrics,
             "challenger_metrics": challenger_metrics,
         })
+
+    def _save_summary(self):
+        import json
+        with open('summary.json','w') as f:
+            json.dump(self.history, f, indent=2)
 
     def _print_summary(self):
         print(f"\n{'='*60}")
