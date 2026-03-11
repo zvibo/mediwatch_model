@@ -94,7 +94,7 @@ This is a portfolio demonstration, not a production system. Key gaps:
 - **Delayed labels.** The holdout evaluation assumes labels are available at evaluation time. In production, challenger evaluation would run after a labeling lag window.
 - **Rollback.** Artifact versioning supports reverting to a previous champion, but automated rollback on live performance degradation is not implemented.
 - **Orchestration.** The pipeline runs as a sequential script. In production, this maps to an Airflow DAG with `max_active_runs=1`, where each run reads the champion state finalized by the previous run.
-- **Weak signal.** ROC-AUC ranges from 0.53 to 0.61. The underlying prediction task is hard, and the pipeline correctly reflects that — some challengers are promoted, some are rejected. A higher-signal dataset (e.g., credit default with a pre/post-2008 split) would make drift effects more visually dramatic.
+- **Weak signal.** ROC-AUC ranges from 0.54 to 0.61. The underlying prediction task is hard, and the pipeline correctly reflects that — some challengers are promoted, some are rejected. A higher-signal dataset (e.g., credit default with a pre/post-2008 split) would make drift effects more visually dramatic.
 
 ## Tools
 
