@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.pipeline import Pipeline
 
 from src.config import (
     ALL_CAT_COLS,
@@ -52,43 +54,79 @@ def _bin_icd9(val) -> str:
 
 
 # ── Cleaning / feature engineering ──────────────────────────────
+class MissingValueReplacer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        X = X.copy()
+        X.replace("?", np.nan, inplace=True)
+        return X
+
+class ICD9Binner(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        X = X.copy()
+        for col in HIGH_CARDINALITY_COLS:
+            if col in X.columns:
+                X[col] = X[col].map(_bin_icd9)
+        return X
+
+class CategoricalStringCaster(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        X = X.copy()
+        for col in ["admission_type_id", "discharge_disposition_id", "admission_source_id"]:
+            if col in X.columns:
+                X[col] = X[col].astype(str)
+        return X
+
+class ColumnDropper(BaseEstimator, TransformerMixin):
+    def __init__(self, drop_cols):
+        self.drop_cols = drop_cols
+        
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        X = X.copy()
+        drop = [c for c in self.drop_cols if c in X.columns]
+        X.drop(columns=drop, inplace=True)
+        return X
+
 def clean_and_engineer(df: pd.DataFrame) -> pd.DataFrame:
-    """Apply all cleaning steps. Call BEFORE fitting or transforming
+    """Apply target creation. Call BEFORE fitting or transforming
     through the sklearn pipeline."""
     df = df.copy()
-
-    # Replace '?' sentinel with NaN
-    df.replace("?", np.nan, inplace=True)
 
     # Binary target
     if "readmitted" in df.columns:
         df[TARGET_COL] = (df["readmitted"] == "<30").astype(int)
 
-    # Bin diagnosis codes
-    for col in HIGH_CARDINALITY_COLS:
-        if col in df.columns:
-            df[col] = df[col].map(_bin_icd9)
+    return df
 
-    # Cast numeric-looking categoricals to str
-    for col in ["admission_type_id", "discharge_disposition_id", "admission_source_id"]:
-        if col in df.columns:
-            df[col] = df[col].astype(str)
-
-    # Drop IDs and original target
-    drop = ID_COLS + ["readmitted"]
-    df.drop(columns=[c for c in drop if c in df.columns], inplace=True)
-
+def engineer_features_for_drift(df: pd.DataFrame) -> pd.DataFrame:
+    """Applies the stateless cleaning steps to generate features for drift detection."""
+    df = df.copy()
+    df = MissingValueReplacer().transform(df)
+    df = ICD9Binner().transform(df)
+    df = CategoricalStringCaster().transform(df)
+    df = ColumnDropper(drop_cols=ID_COLS + ["readmitted", TARGET_COL]).transform(df)
     return df
 
 
 # ── sklearn ColumnTransformer ───────────────────────────────────
-def build_preprocessor() -> ColumnTransformer:
-    """Return a ColumnTransformer suitable for tree-based models.
+def build_preprocessor() -> Pipeline:
+    """Return a Pipeline suitable for tree-based models.
 
     This object becomes the first step in the Pipeline serialized by
-    training.py, so it does NOT need to be saved on its own.
+    training.py, so it includes manual transformers and ColumnTransformer.
     """
-    return ColumnTransformer(
+    ct = ColumnTransformer(
         transformers=[
             ("num", "passthrough", NUMERIC_COLS),
             (
@@ -103,6 +141,14 @@ def build_preprocessor() -> ColumnTransformer:
         ],
         remainder="drop",
     )
+    
+    return Pipeline(steps=[
+        ("missing_replacer", MissingValueReplacer()),
+        ("icd9_binner", ICD9Binner()),
+        ("cat_caster", CategoricalStringCaster()),
+        ("id_dropper", ColumnDropper(drop_cols=ID_COLS + ["readmitted"])),
+        ("column_transformer", ct)
+    ])
 
 
 # ── Convenience split ──────────────────────────────────────────

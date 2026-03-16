@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Run the full pipeline without Airflow — for local dev/debug."""
+"""Run the full pipeline without Airflow — for local dev/debug.
+
+Old version - pre class refactor
+"""
 
 import sys
 from pathlib import Path

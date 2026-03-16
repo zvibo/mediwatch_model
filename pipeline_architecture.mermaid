@@ -1,0 +1,34 @@
+flowchart TD
+    Start([New Window]) --> ChampCheck{Champion<br/>exists?}
+
+    ChampCheck -- No --> Train1[Train on window]
+    Train1 --> Install[Install as champion]
+    Install --> Log1[Log metrics]
+    Log1 --> Done([Done])
+
+    ChampCheck -- Yes --> Drift[Run Evidently<br/>drift detection]
+    Drift --> DriftCheck{Drift<br/>detected?}
+
+    DriftCheck -- No --> EvalChamp[Evaluate champion<br/>on new data]
+    EvalChamp --> Keep1[Champion carries forward]
+    Keep1 --> Log2[Log metrics]
+    Log2 --> Done
+
+    DriftCheck -- Yes --> Train2[Train challenger<br/>on new window]
+    Train2 --> EvalBoth[Evaluate both on<br/>shared eval set]
+    EvalBoth --> Compare{Challenger F1 ≥<br/>Champion F1 + 1%?}
+
+    Compare -- Yes --> Promote[Promote challenger<br/>to champion]
+    Promote --> Log3[Log both metrics]
+    Log3 --> Done
+
+    Compare -- No --> Retain[Retain champion]
+    Retain --> Log4[Log both metrics]
+    Log4 --> Done
+
+    style Start fill:#6366f1,color:#fff,stroke:none
+    style Done fill:#6366f1,color:#fff,stroke:none
+    style Promote fill:#22c55e,color:#fff,stroke:none
+    style Retain fill:#f59e0b,color:#fff,stroke:none
+    style Install fill:#22c55e,color:#fff,stroke:none
+    style Keep1 fill:#64748b,color:#fff,stroke:none
