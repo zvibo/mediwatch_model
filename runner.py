@@ -242,6 +242,7 @@ class ChampionChallengerPipeline:
                 chall_metrics["f1"] >= champ_metrics["f1"] + self.promotion_threshold
             )
             outcome = "promoted" if promoted else "retained"
+            previous_champion = self.champion_date
 
             if promoted:
                 self.champion_date = ds
@@ -251,7 +252,7 @@ class ChampionChallengerPipeline:
                 "window_date":         ds,
                 "outcome":             outcome,
                 "champion_date":       self.champion_date,
-                "previous_champion":   self.champion_date if not promoted else "replaced",
+                "previous_champion":   previous_champion,
                 "promotion_threshold": self.promotion_threshold,
             })
 

@@ -43,15 +43,6 @@ def run_drift_report(
     report.save_html(str(path))
 
     results = report.as_dict()
-    # DEBUG: dump the structure to see what we're actually getting
-    # import json
-    # print(json.dumps(results, indent=2, default=str)[:3000])
-
-
-    # dataset_drift: bool = results["metrics"][0]["result"]["dataset_drift"]
-    # return dataset_drift
-
-    # Count individual drifted columns
     column_results = results["metrics"][0]["result"]["drift_by_columns"]
     drifted = [
         col for col, info in column_results.items()
