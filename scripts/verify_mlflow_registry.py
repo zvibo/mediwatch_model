@@ -29,6 +29,8 @@ from sklearn.datasets import make_classification
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 
+from src.mlflow_utils import ensure_experiment_active
+
 # --- Configuration ---
 EXPERIMENT_NAME  = "mediwatch_xgboost_runs"
 REGISTERED_MODEL = "mediwatch_xgboost"
@@ -107,22 +109,6 @@ def create_run_artifact(config: dict, metrics: dict) -> str:
 # Main
 # ---------------------------------------------------------------------------
 
-def ensure_experiment_active(client: MlflowClient, name: str):
-    """
-    On a SQLAlchemy backend, deleted experiments keep their name reserved —
-    there is no hard-delete via the Python API. The only way to free the name
-    is to restore the experiment and rename it, then create a fresh one.
-    """
-    experiment = client.get_experiment_by_name(name)
-    if experiment is not None and experiment.lifecycle_stage == "deleted":
-        import time
-        archived_name = f"{name}_archived_{int(time.time())}"
-        print(f"Found soft-deleted experiment '{name}' — renaming to '{archived_name}' to free the name...")
-        client.restore_experiment(experiment.experiment_id)
-        client.rename_experiment(experiment.experiment_id, archived_name)
-        client.delete_experiment(experiment.experiment_id)
-        print(f"  Done. A fresh experiment will be created.")
-    mlflow.set_experiment(name)
 
 
 def main():

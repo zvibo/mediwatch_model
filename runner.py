@@ -20,7 +20,6 @@ import json
 import os
 import sys
 import tempfile
-import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -30,6 +29,7 @@ import mlflow.sklearn
 from mlflow import MlflowClient
 
 from src.config import WINDOW_DATES
+from src.mlflow_utils import ensure_experiment_active
 from src.data import get_previous_window_date, load_eval, load_sliding_train
 from src.drift import run_drift_report
 from src.evaluation import evaluate_and_save
@@ -54,19 +54,8 @@ DRIFT_REPORT_DIR    = Path("artifacts/reports")
 # ---------------------------------------------------------------------------
 
 def _setup_experiment(client: MlflowClient) -> None:
-    """
-    Ensure the experiment exists and is active.
-    On a SQLAlchemy backend, deleted experiments hold their name — we
-    restore → rename → delete to free it, then create fresh.
-    """
-    experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
-    if experiment is not None and experiment.lifecycle_stage == "deleted":
-        archived = f"{EXPERIMENT_NAME}_archived_{int(time.time())}"
-        print(f"[MLflow] Soft-deleted experiment found — archiving as '{archived}'")
-        client.restore_experiment(experiment.experiment_id)
-        client.rename_experiment(experiment.experiment_id, archived)
-        client.delete_experiment(experiment.experiment_id)
-    mlflow.set_experiment(EXPERIMENT_NAME)
+    """Ensure the experiment exists and is active."""
+    ensure_experiment_active(client, EXPERIMENT_NAME)
 
 
 def _register_and_alias(
