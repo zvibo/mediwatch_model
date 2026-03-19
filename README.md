@@ -1,5 +1,7 @@
 # Champion / Challenger Retraining Pipeline
 
+![Pipeline Architecture](docs/pretty_architecture.png)
+
 A demonstration of automated model retraining with drift monitoring and gated promotion. The pipeline processes sequential time windows, trains a challenger model on each new window, and promotes it only when it measurably outperforms the incumbent champion on the current window's evaluation set.
 
 ## Why This Exists
@@ -40,6 +42,7 @@ Each window produces an HTML report with three sections:
 │   ├── training.py          # model fit + save
 │   ├── evaluation.py        # metrics + save
 │   └── drift.py             # evidently reports
+│   └── mlflow_utils.py      # mlflow tools (for iteration)
 ├── windows/                 # Immutable windowed parquet files (by ISO date)
 │   ├── 2004-12-31-train.parquet
 │   ├── 2004-12-31-eval.parquet
@@ -79,6 +82,30 @@ uv run runner.py > runner.log
 ```
 
 Output is written to `artifacts/`. Reports are archived under `artifacts/reports/drift_{window_date}.html`.
+
+## MLflow Tracking
+
+Each pipeline run logs metrics, parameters, artifacts, and model versions to MLflow.
+
+**Experiment runs** — All windows appear as runs with champion/challenger metrics, promotion outcomes, and drift status:
+
+![MLflow Runs](docs/mlflow_metrics_screenshot.png)
+
+**Single run detail** — Each run records both champion and challenger metrics, parameters (window date, outcome, previous champion), and links to the registered model version:
+
+![MLflow Single Run](docs/mlflow_single_run_screenshot.png)
+
+**Drift report artifact** — Evidently drift reports are logged as HTML artifacts, showing per-column distribution shifts:
+
+![MLflow Drift Report](docs/mlflow_drift_screenshot.png)
+
+**Run summary artifact** — A JSON summary capturing the promotion decision and side-by-side metrics:
+
+![MLflow Summary JSON](docs/mlflow_summary_json_screenshot.png)
+
+**Model registry** — Every trained model is registered as a new version; the current champion gets the `@champion` alias:
+
+![MLflow Registry](docs/mlflow_registry_screenshot.png)
 
 ## Key Design Decisions
 
