@@ -1,9 +1,0 @@
-{
-  "model_date": "2005-12-31",
-  "eval_window_date": "2005-12-31",
-  "accuracy": 0.8799,
-  "f1": 0.1125,
-  "precision": 0.1535,
-  "recall": 0.0888,
-  "roc_auc": 0.5988
-}

@@ -5,13 +5,6 @@ import pandas as pd
 from src.config import WINDOWS_DIR, WINDOW_DATES
 
 
-def ds_to_window_date(ds: str) -> str:
-    """Map Airflow ds directly to a window date. ds IS the window date."""
-    if ds not in WINDOW_DATES:
-        raise ValueError(f"ds={ds} not in known windows: {WINDOW_DATES}")
-    return ds
-
-
 def get_previous_window_date(ds: str) -> str | None:
     """Return the prior window date, or None if this is the first."""
     idx = WINDOW_DATES.index(ds)

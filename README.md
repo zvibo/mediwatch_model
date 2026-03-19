@@ -45,6 +45,9 @@ Each window produces an HTML report with three sections:
 │   ├── 2004-12-31-eval.parquet
 │   ├── ...
 │   └── 2008-12-31-eval.parquet
+├── scripts/                 # Acceptance tests — not part of the pipeline
+│   ├── verify_mlflow_registry.py  # End-to-end MLflow registry test on synthetic data
+│   └── verify_mlflow_cleanup.py   # Verifies MLflow experiment/model cleanup
 ├── artifacts/
 │   ├── pipelines/           # Serialized sklearn pipelines (champion + challengers)
 │   ├── evaluations/         # metrics JSON per model per window

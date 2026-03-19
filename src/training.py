@@ -9,7 +9,7 @@ from src.preprocessing import build_preprocessor
 
 
 def build_pipeline() -> Pipeline:
-    """Create an unfitted Pipeline: ColumnTransformer → LGBMClassifier."""
+    """Create an unfitted Pipeline: ColumnTransformer → XGBClassifier."""
     return Pipeline(
         steps=[
             ("preprocessor", build_preprocessor()),
