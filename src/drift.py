@@ -3,7 +3,6 @@
 import warnings
 
 import pandas as pd
-from evidently.metric_preset import DataDriftPreset
 from evidently.metrics import DataDriftTable
 from evidently.report import Report
 
