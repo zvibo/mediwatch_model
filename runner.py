@@ -53,11 +53,6 @@ DRIFT_REPORT_DIR    = Path("artifacts/reports")
 # MLflow helpers
 # ---------------------------------------------------------------------------
 
-def _setup_experiment(client: MlflowClient) -> None:
-    """Ensure the experiment exists and is active."""
-    ensure_experiment_active(client, EXPERIMENT_NAME)
-
-
 def _register_and_alias(
     client: MlflowClient,
     run_id: str,
@@ -160,7 +155,7 @@ class ChampionChallengerPipeline:
     # ── Public entry point ──────────────────────────────────────────────────
 
     def run(self):
-        _setup_experiment(self._client)
+        ensure_experiment_active(self._client, EXPERIMENT_NAME)
         for ds in self.window_dates:
             self._run_window(ds)
         self._save_summary()
