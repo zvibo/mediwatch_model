@@ -1,0 +1,116 @@
+# docker-compose.yml
+# ---------------------------------------------------------------------------
+# Airflow stack for mediwatch model pipeline orchestration
+#
+# Services:
+#   postgres   — Airflow metadata database
+#   airflow-init — one-shot DB init + admin user creation
+#   scheduler  — Airflow scheduler
+#   webserver  — Airflow UI  (http://localhost:8080)
+#   triggerer  — required for deferrable operators
+#
+# Volumes:
+#   ./dags          — DAG files (mounted into all Airflow services)
+#   ./logs/airflow  — Airflow task logs
+#   ./scripts       — trigger + acceptance test scripts
+#   .               — project root mounted so runner.py + src/ are importable
+#
+# Usage:
+#   docker compose up -d
+#   docker compose logs -f webserver
+#   docker compose down -v   # also removes DB volume
+# ---------------------------------------------------------------------------
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.3-python3.11
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: "81HqDtbqAywKSOumSha3BhWNOdQ26slT6K0YaZeZyPs="
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+    AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth"
+    AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+    # Make project importable inside tasks
+    PYTHONPATH: /opt/mediwatch
+    # uv cache inside container
+    UV_CACHE_DIR: /opt/airflow/uv-cache
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs/airflow:/opt/airflow/logs
+    - ./scripts:/opt/airflow/scripts
+    - .:/opt/mediwatch          # project root — runner.py, src/, pyproject.toml
+    - uv-cache:/opt/airflow/uv-cache
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  airflow-init:
+    <<: *airflow-common
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create
+          --username admin
+          --password admin
+          --firstname Admin
+          --lastname User
+          --role Admin
+          --email admin@mediwatch.local
+      "
+    restart: "no"
+
+  scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob", "--hostname", "$${HOSTNAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  triggerer:
+    <<: *airflow-common
+    command: triggerer
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "TriggererJob", "--hostname", "$${HOSTNAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres-db:
+  uv-cache:
