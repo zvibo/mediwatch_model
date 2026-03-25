@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from src.config import WINDOWS_DIR, WINDOW_DATES
+from src.config import WINDOW_DATES, WINDOWS_DIR
 
 
 def get_previous_window_date(ds: str) -> str | None:

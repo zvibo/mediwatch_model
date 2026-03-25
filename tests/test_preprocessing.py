@@ -2,19 +2,17 @@
 
 import numpy as np
 import pandas as pd
-import pytest
 from sklearn.pipeline import Pipeline
 
+from src.config import NUMERIC_COLS
 from src.preprocessing import (
-    MissingValueReplacer,
-    ICD9Binner,
     CategoricalStringCaster,
+    ICD9Binner,
+    MissingValueReplacer,
+    _bin_icd9,
     build_preprocessor,
     clean_and_engineer,
-    _bin_icd9,
 )
-from src.config import NUMERIC_COLS, ALL_CAT_COLS
-
 
 # ── MissingValueReplacer ─────────────────────────────────────────────────────
 

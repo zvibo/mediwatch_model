@@ -1,15 +1,10 @@
 """Unit tests for src/evaluation.py"""
 
 import json
-import tempfile
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pandas as pd
-import pytest
 from sklearn.pipeline import Pipeline
-
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 

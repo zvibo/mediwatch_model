@@ -6,7 +6,6 @@ The promotion condition (inlined from runner.py) is:
 We test this condition directly without importing runner.py.
 """
 
-import pytest
 
 # Inline the promotion threshold from config to avoid runner.py imports
 PROMOTION_THRESHOLD = 0.01
