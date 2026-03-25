@@ -1,3 +1,5 @@
+# Python 3.11 used here because no apache/airflow 2.9.x image exists for 3.13;
+# pyproject.toml requires >=3.11 to accommodate this.
 FROM apache/airflow:2.9.3-python3.11
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
