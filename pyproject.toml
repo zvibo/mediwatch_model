@@ -23,6 +23,10 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.6",
 ]
+serving = [
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.20",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
