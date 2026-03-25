@@ -1,0 +1,33 @@
+# docker-compose.pipeline.yml
+# ---------------------------------------------------------------------------
+# Override that:
+#   1. Builds with parent project context so uv installs from pyproject.toml
+#   2. Mounts parent project into containers so DAG tasks can import src.*
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.pipeline.yml up -d --build
+#
+# Standalone acceptance test (no project mount needed):
+#   docker compose up -d --build
+# ---------------------------------------------------------------------------
+
+x-pipeline: &pipeline
+  build:
+    context: ..
+    dockerfile: airflow/Dockerfile
+    args:
+      INSTALL_DEPS: "true"
+  environment: &pipeline-env
+    PYTHONPATH: /opt/mediwatch
+    MLFLOW_TRACKING_URI: sqlite:////opt/mediwatch/mlflow.db
+    MLFLOW_ARTIFACT_ROOT: /opt/mediwatch/mlruns
+  volumes: &pipeline-volumes
+    - ..:/opt/mediwatch
+
+services:
+  airflow-init:
+    <<: *pipeline
+  scheduler:
+    <<: *pipeline
+  webserver:
+    <<: *pipeline
