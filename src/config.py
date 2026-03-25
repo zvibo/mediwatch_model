@@ -25,7 +25,8 @@ WINDOW_DATES = [
 # ── MLflow / pipeline constants ───────────────────────────────
 EXPERIMENT_NAME     = "mediwatch_champion_challenger"
 REGISTERED_MODEL    = "mediwatch_xgboost"
-CHAMPION_ALIAS      = "champion"
+CHAMPION_ALIAS          = "champion"
+PREVIOUS_CHAMPION_ALIAS = "previous_champion"
 PROMOTION_THRESHOLD = 0.01
 
 TARGET_COL = "readmitted_binary"

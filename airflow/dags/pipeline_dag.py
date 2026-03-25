@@ -224,7 +224,7 @@ def promote_decision(**context):
     import mlflow
     import mlflow.sklearn
     from mlflow import MlflowClient
-    from src.config import CHAMPION_ALIAS, PROMOTION_THRESHOLD, REGISTERED_MODEL
+    from src.config import CHAMPION_ALIAS, PREVIOUS_CHAMPION_ALIAS, PROMOTION_THRESHOLD, REGISTERED_MODEL
     from src.training import load_pipeline
 
     state       = context["ti"].xcom_pull(task_ids="detect_window")
@@ -267,6 +267,13 @@ def promote_decision(**context):
         mv = mlflow.register_model(model_uri=model_uri, name=REGISTERED_MODEL)
 
         if promoted:
+            # Save current champion as previous_champion before promoting
+            try:
+                current = client.get_model_version_by_alias(REGISTERED_MODEL, CHAMPION_ALIAS)
+                client.set_registered_model_alias(REGISTERED_MODEL, PREVIOUS_CHAMPION_ALIAS, current.version)
+                print(f"Saved v{current.version} → @{PREVIOUS_CHAMPION_ALIAS}")
+            except Exception:
+                pass  # No current champion (cold start), nothing to save
             client.set_registered_model_alias(
                 name=REGISTERED_MODEL,
                 alias=CHAMPION_ALIAS,
