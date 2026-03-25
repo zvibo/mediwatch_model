@@ -16,3 +16,16 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "xgboost>=3.2.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["src/old"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

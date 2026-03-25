@@ -29,16 +29,23 @@ import mlflow.sklearn
 from mlflow import MlflowClient
 
 from src.config import (
-    ARTIFACTS_DIR, CHAMPION_ALIAS, EXPERIMENT_NAME, PROMOTION_THRESHOLD,
-    REGISTERED_MODEL, REPORTS_DIR, WINDOW_DATES,
+    ARTIFACTS_DIR,
+    CHAMPION_ALIAS,
+    EXPERIMENT_NAME,
+    PROMOTION_THRESHOLD,
+    REGISTERED_MODEL,
+    REPORTS_DIR,
+    WINDOW_DATES,
+    init_dirs,
 )
-from src.mlflow_utils import ensure_experiment_active
 from src.data import get_previous_window_date, load_eval, load_sliding_train
 from src.drift import run_drift_report
 from src.evaluation import evaluate_and_save
+from src.mlflow_utils import ensure_experiment_active
 from src.preprocessing import clean_and_engineer, engineer_features_for_drift, split_xy
 from src.training import load_pipeline, train_and_save
 
+init_dirs()
 
 
 # ---------------------------------------------------------------------------
@@ -267,7 +274,10 @@ class ChampionChallengerPipeline:
                                   champ_metrics, chall_metrics)
 
             if promoted:
-                print(f"  PROMOTED: {ds}  (F1 {chall_metrics['f1']:.4f} vs {champ_metrics['f1']:.4f})")
+                print(
+                    f"  PROMOTED: {ds}  "
+                    f"(F1 {chall_metrics['f1']:.4f} vs {champ_metrics['f1']:.4f})"
+                )
             else:
                 print(f"  RETAINED: {self.champion_date}  "
                       f"(F1 {champ_metrics['f1']:.4f} vs challenger {chall_metrics['f1']:.4f})")
@@ -278,7 +288,7 @@ class ChampionChallengerPipeline:
 
     def _skip(self, ds: str, X_val, y_val):
         """No drift — evaluate champion on new data, no training."""
-        with mlflow.start_run(run_name=f"{ds}_no_drift") as run:
+        with mlflow.start_run(run_name=f"{ds}_no_drift"):
             pipe    = load_pipeline(self.champion_date)
             metrics = evaluate_and_save(
                 pipe, X_val, y_val,
@@ -359,7 +369,7 @@ class ChampionChallengerPipeline:
 
         print(f"\n  Experiment : {EXPERIMENT_NAME}")
         print(f"  Registry   : {REGISTERED_MODEL}  (@{CHAMPION_ALIAS} = v{self.champion_version})")
-        print(f"\n  Run  'mlflow ui'  →  http://localhost:5000")
+        print("\n  Run  'mlflow ui'  →  http://localhost:5000")
 
 
 # ---------------------------------------------------------------------------

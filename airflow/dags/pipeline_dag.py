@@ -50,8 +50,10 @@ def detect_window(**context):
     _ensure_pythonpath()
     import mlflow
     from mlflow import MlflowClient
-    from src.config import CHAMPION_ALIAS, EXPERIMENT_NAME, REGISTERED_MODEL
+    from src.config import CHAMPION_ALIAS, EXPERIMENT_NAME, REGISTERED_MODEL, init_dirs
     from src.mlflow_utils import ensure_experiment_active
+
+    init_dirs()
 
     ds = context["dag_run"].conf["window_date"]
     client = MlflowClient()

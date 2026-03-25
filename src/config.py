@@ -7,9 +7,11 @@ PIPELINES_DIR = ARTIFACTS_DIR / "pipelines"
 EVALUATIONS_DIR = ARTIFACTS_DIR / "evaluations"
 REPORTS_DIR = ARTIFACTS_DIR / "reports"
 
-# Create dirs at import time
-for d in [PIPELINES_DIR, EVALUATIONS_DIR, REPORTS_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
+def init_dirs() -> None:
+    """Create artifact directories. Call this before first use of pipeline paths."""
+    for d in [PIPELINES_DIR, EVALUATIONS_DIR, REPORTS_DIR]:
+        d.mkdir(parents=True, exist_ok=True)
+
 
 # Ordered window dates — each maps 1:1 to an Airflow ds
 WINDOW_DATES = [
