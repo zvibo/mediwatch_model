@@ -20,6 +20,12 @@ WINDOW_DATES = [
     "2008-12-31",
 ]
 
+# ── MLflow / pipeline constants ───────────────────────────────
+EXPERIMENT_NAME     = "mediwatch_champion_challenger"
+REGISTERED_MODEL    = "mediwatch_xgboost"
+CHAMPION_ALIAS      = "champion"
+PROMOTION_THRESHOLD = 0.01
+
 TARGET_COL = "readmitted_binary"
 
 # ── Feature groups ──────────────────────────────────────────────

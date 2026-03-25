@@ -3,7 +3,7 @@ name = "mediwatch-model"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = "==3.13.1"
+requires-python = ">=3.11"
 dependencies = [
     "apache-airflow>=2.9,<3",
     "evidently>=0.4,<0.5",

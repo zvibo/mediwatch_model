@@ -48,7 +48,17 @@ Each window produces an HTML report with three sections:
 │   ├── 2004-12-31-eval.parquet
 │   ├── ...
 │   └── 2008-12-31-eval.parquet
-├── scripts/                 # Acceptance tests — not part of the pipeline
+├── airflow/                 # Airflow orchestration layer (see airflow/CLAUDE.md)
+│   ├── docker-compose.yml          # Standalone Airflow stack
+│   ├── docker-compose.pipeline.yml # Override: mounts project + installs deps
+│   ├── Dockerfile                  # Custom image with uv + project deps
+│   ├── dags/
+│   │   ├── acceptance_test_dag.py  # Stack validation (no project imports)
+│   │   └── pipeline_dag.py         # Champion/challenger pipeline (6 tasks)
+│   └── scripts/
+│       ├── trigger_windows.py      # REST API trigger + poll
+│       └── run_acceptance_test.sh  # End-to-end stack test
+├── scripts/                 # Verification scripts — not part of the pipeline
 │   ├── verify_mlflow_registry.py  # End-to-end MLflow registry test on synthetic data
 │   └── verify_mlflow_cleanup.py   # Verifies MLflow experiment/model cleanup
 ├── artifacts/
@@ -77,9 +87,16 @@ Make sure you have uv installed. (https://docs.astral.sh/uv/getting-started/inst
 uv sync
 uv run generate_windows.py
 
-# 2. Run the full pipeline across all windows
+# 2a. Run locally — all 5 windows sequentially in one process
 uv run runner.py > runner.log
+
+# 2b. Run via Airflow — one DAG run per window, triggered sequentially
+cd airflow
+docker compose -f docker-compose.yml -f docker-compose.pipeline.yml up -d --build
+uv run python scripts/trigger_windows.py --dag-id mediwatch_pipeline --poll-secs 30
 ```
+
+Both paths call the same `src/` functions and write to the same MLflow store (`mlflow.db` + `mlruns/`). `runner.py` is simpler for development; the Airflow DAG shows how the pipeline would operate in production — each window is an independent DAG run, and cross-run state (which model is champion) lives in the MLflow model registry's `@champion` alias rather than in-memory.
 
 Output is written to `artifacts/`. Reports are archived under `artifacts/reports/drift_{window_date}.html`.
 
@@ -125,12 +142,13 @@ This is a portfolio demonstration, not a production system. Key gaps:
 
 - **Delayed labels.** The per-window evaluation assumes labels are available at evaluation time. In production, challenger evaluation would run after a labeling lag window.
 - **Rollback.** Artifact versioning supports reverting to a previous champion, but automated rollback on live performance degradation is not implemented.
-- **Orchestration.** The pipeline runs as a sequential script. In production, this maps to an Airflow DAG with `max_active_runs=1`, where each run reads the champion state finalized by the previous run.
+- **Orchestration.** The Airflow DAG runs windows sequentially via an external trigger script. In production, each DAG run would be triggered by an event (new data arriving) rather than a script iterating through historical dates.
 - **Weak signal.** ROC-AUC ranges from 0.54 to 0.61. The underlying prediction task is hard, and the pipeline correctly reflects that — some challengers are promoted, some are rejected. A higher-signal dataset (e.g., credit default with a pre/post-2008 split) would make drift effects more visually dramatic.
 
 ## Tools
 
 - **scikit-learn** — Pipeline, ColumnTransformer, OrdinalEncoder, model training
 - **Evidently** — Drift detection and data quality reports
-- **MLflow** — Metric logging and model artifact tracking
+- **MLflow** — Metric logging, model registry, and artifact tracking
+- **Airflow** — DAG orchestration (one run per data window)
 - **pandas / numpy** — Data manipulation

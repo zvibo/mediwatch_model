@@ -28,22 +28,16 @@ import mlflow
 import mlflow.sklearn
 from mlflow import MlflowClient
 
-from src.config import ARTIFACTS_DIR, REPORTS_DIR, WINDOW_DATES
+from src.config import (
+    ARTIFACTS_DIR, CHAMPION_ALIAS, EXPERIMENT_NAME, PROMOTION_THRESHOLD,
+    REGISTERED_MODEL, REPORTS_DIR, WINDOW_DATES,
+)
 from src.mlflow_utils import ensure_experiment_active
 from src.data import get_previous_window_date, load_eval, load_sliding_train
 from src.drift import run_drift_report
 from src.evaluation import evaluate_and_save
 from src.preprocessing import clean_and_engineer, engineer_features_for_drift, split_xy
 from src.training import load_pipeline, train_and_save
-
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
-PROMOTION_THRESHOLD = 0.01          # challenger must beat champion F1 by this margin
-EXPERIMENT_NAME     = "mediwatch_champion_challenger"
-REGISTERED_MODEL    = "mediwatch_xgboost"
-CHAMPION_ALIAS      = "champion"
 
 
 
