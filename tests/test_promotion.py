@@ -11,7 +11,8 @@ We test this condition directly without importing runner.py.
 PROMOTION_THRESHOLD = 0.01
 
 
-def should_promote(chall_f1: float, champ_f1: float, threshold: float = PROMOTION_THRESHOLD) -> bool:
+def should_promote(chall_f1: float, champ_f1: float, 
+                   threshold: float = PROMOTION_THRESHOLD) -> bool:
     """Mirror of the promotion condition in ChampionChallengerPipeline._challenge."""
     return chall_f1 >= champ_f1 + threshold
 
