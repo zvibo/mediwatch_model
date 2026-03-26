@@ -28,5 +28,5 @@ jobs:
       - name: Lint with ruff
         run: uv run ruff check src/ tests/ runner.py
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: uv run pytest tests/ -v --tb=short

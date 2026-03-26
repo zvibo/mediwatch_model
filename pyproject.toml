@@ -31,6 +31,7 @@ serving = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+addopts = "--cov=src --cov=serving --cov-fail-under=60"
 
 [tool.ruff]
 line-length = 100
