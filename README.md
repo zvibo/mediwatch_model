@@ -124,6 +124,10 @@ Each pipeline run logs metrics, parameters, artifacts, and model versions to MLf
 
 ![MLflow Registry](docs/mlflow_registry_screenshot.png)
 
+## Model Card
+
+See [MODEL_CARD.md](MODEL_CARD.md) for model details, intended use, performance characteristics, ethical considerations, and limitations.
+
 ## Key Design Decisions
 
 **Champion/challenger over drift-triggered retraining.** Drift detection tells you the input distribution changed — not whether your model got worse. Evaluating on the most recent data answers the question that matters: does the new model actually perform better?
