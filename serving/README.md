@@ -84,3 +84,14 @@ curl -X POST http://localhost:8000/predict \
 ```bash
 uv sync --extra serving
 ```
+
+## Docker
+
+Build and run the serving layer as a standalone container:
+
+```bash
+docker build -t mediwatch-serving -f serving/Dockerfile .
+docker run -p 8000:8000 -v ./mlflow.db:/app/mlflow.db -v ./mlruns:/app/mlruns mediwatch-serving
+```
+
+The container needs access to the MLflow store (SQLite DB + artifact directory) to load the champion model.
