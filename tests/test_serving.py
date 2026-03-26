@@ -64,6 +64,7 @@ def test_health():
     assert resp.json() == {"status": "ok"}
 
 
+@patch("serving.app._model_version", "5")
 @patch("serving.app._get_model")
 def test_predict_returns_valid_response(mock_get_model):
     mock_model = MagicMock()
@@ -77,10 +78,13 @@ def test_predict_returns_valid_response(mock_get_model):
     data = resp.json()
     assert data["prediction"] == 1
     assert data["probability"] == pytest.approx(0.63)
+    assert data["model_name"] == "mediwatch_xgboost"
+    assert data["model_version"] == "5"
     mock_model.predict.assert_called_once()
     mock_model.predict_proba.assert_called_once()
 
 
+@patch("serving.app._model_version", "5")
 @patch("serving.app._get_model")
 def test_predict_negative_class(mock_get_model):
     mock_model = MagicMock()
@@ -102,6 +106,7 @@ def test_predict_missing_field():
     assert resp.status_code == 422
 
 
+@patch("serving.app._model_version", "5")
 @patch("serving.app._get_model")
 def test_predict_dataframe_has_correct_columns(mock_get_model):
     """Verify hyphenated column names are restored in the DataFrame."""

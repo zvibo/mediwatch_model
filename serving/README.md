@@ -73,11 +73,12 @@ curl -X POST http://localhost:8000/predict \
 ## Example response
 
 ```json
-{"prediction": 1, "probability": 0.6312}
+{"prediction": 1, "probability": 0.6312, "model_name": "mediwatch_xgboost", "model_version": "5"}
 ```
 
 `prediction` is `1` if the model predicts the patient will be readmitted within 30 days, `0` otherwise.
 `probability` is the model's confidence that the label is `1`.
+`model_name` and `model_version` identify which registered model version produced the prediction.
 
 ## Install serving dependencies
 

@@ -15,17 +15,25 @@ from src.config import (
 
 app = FastAPI(title="mediwatch-serving", version="0.1.0")
 
-# Module-level variable; populated lazily on first predict request.
+# Module-level state; populated lazily on first predict request.
 _model: Any = None
+_model_version: str | None = None
 
 
 def _get_model() -> Any:
-    global _model
+    global _model, _model_version
     if _model is None:
         import mlflow.sklearn
+        from mlflow import MlflowClient
 
         uri = f"models:/{REGISTERED_MODEL}@{CHAMPION_ALIAS}"
         _model = mlflow.sklearn.load_model(uri)
+        try:
+            client = MlflowClient()
+            mv = client.get_model_version_by_alias(REGISTERED_MODEL, CHAMPION_ALIAS)
+            _model_version = mv.version
+        except Exception:
+            _model_version = "unknown"
     return _model
 
 
@@ -87,6 +95,8 @@ class PredictRequest(BaseModel):
 class PredictResponse(BaseModel):
     prediction: int
     probability: float
+    model_name: str
+    model_version: str
 
 
 @app.get("/health")
@@ -116,4 +126,9 @@ def predict(body: PredictRequest) -> PredictResponse:
     prediction = int(model.predict(df)[0])
     probability = float(model.predict_proba(df)[0][1])
 
-    return PredictResponse(prediction=prediction, probability=probability)
+    return PredictResponse(
+        prediction=prediction,
+        probability=probability,
+        model_name=REGISTERED_MODEL,
+        model_version=_model_version or "unknown",
+    )
