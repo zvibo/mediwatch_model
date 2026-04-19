@@ -4,6 +4,10 @@
 
 A demonstration of automated model retraining with drift monitoring and gated promotion. The pipeline processes sequential time windows, trains a challenger model on each new window, and promotes it only when it measurably outperforms the incumbent champion on the current window's evaluation set.
 
+## What This Demonstrates
+
+This project is an **ML engineering system**, not just a model. If you are not from a machine learning background, think of it as an automated decision pipeline: a new model version is trained on fresh data, tested head-to-head against the current production model on a held-out evaluation set, and only promoted if it wins by a meaningful margin — otherwise the incumbent stays. The system detects when incoming data has shifted enough to warrant retraining, orchestrates the train/evaluate/promote workflow across five time windows using Apache Airflow, tracks every experiment with MLflow, and produces an HTML report for each decision. The engineering skills it exercises are pipeline orchestration, experiment tracking, containerised workflows (Docker), automated promotion gating, and reproducible data versioning — applied to a healthcare readmission dataset.
+
 ## Why This Exists
 
 Predictive models degrade as the data distribution shifts. The standard response — periodic retraining on a schedule — wastes compute when nothing has changed and reacts too slowly when something has. This project implements a champion/challenger evaluation loop that makes promotion decisions based on holdout performance, with drift analysis providing observational context.
@@ -84,15 +88,19 @@ Make sure you have uv installed. (https://docs.astral.sh/uv/getting-started/inst
 
 ```bash
 # 1. Prepare frozen window snapshots (one-time)
+#    Optional if you already checked out the repos
 uv sync
 uv run generate_windows.py
 
 # 2a. Run locally — all 5 windows sequentially in one process
+#     Optional if you want to reset mlflow use runner_cleanup.py url http://127.0.0.1:5000/ 
 uv run runner.py > runner.log
+uv run mlflow ui
 
 # 2b. Run via Airflow — one DAG run per window, triggered sequentially
 cd airflow
 docker compose -f docker-compose.yml -f docker-compose.pipeline.yml up -d --build
+# http://localhost:8080/login
 uv run python scripts/trigger_windows.py --dag-id mediwatch_pipeline --poll-secs 30
 ```
 
